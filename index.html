@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Forge</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="about-link">
+            <button id="aboutBtn" class="about-btn">About Site</button>
+        </div>
+        <!-- Theme Toggle Button -->
+        <button id="themeToggle" class="theme-toggle">
+            <svg class="sun-icon" viewBox="0 0 24 24">
+                <path d="M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3zm0-2c.28 0 .5-.22.5-.5v-3c0-.28-.22-.5-.5-.5s-.5.22-.5.5v3c0 .28.22.5.5.5zm0 14c-.28 0-.5.22-.5.5v3c0 .28.22.5.5.5s.5-.22.5-.5v-3c0-.28-.22-.5-.5-.5zm8.5-8.5h-3c-.28 0-.5.22-.5.5s.22.5.5.5h3c.28 0 .5-.22.5-.5s-.22-.5-.5-.5zm-14 0h-3c-.28 0-.5.22-.5.5s.22.5.5.5h3c.28 0 .5-.22.5-.5s-.22-.5-.5-.5z"/>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24">
+                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+            </svg>
+        </button>
+
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen hidden">
+            <div class="loader"></div>
+            <p>Generating your quiz...</p>
+        </div>
+
+        <h1>Quiz Forge</h1>
+        
+        <!-- Quiz Generation Form -->
+        <form id="quizForm" class="quiz-form">
+            <div class="form-group">
+                <label for="textInput">Enter Text</label>
+                <textarea id="textInput" rows="4" placeholder="Enter the text you want to generate questions from..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="fileInput">Upload a Text or PDF File:</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" accept=".txt,.pdf">
+                    <label for="fileInput" class="file-input-label">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        Choose a file
+                    </label>
+                    <span class="file-name">No file chosen</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="questionCount">Number of Questions:</label>
+                <div class="number-input-wrapper">
+                    <input type="number" 
+                           id="questionCount" 
+                           min="1" 
+                           max="30" 
+                           value="5"
+                           placeholder="Enter number (1-30)">
+                    <div class="number-controls">
+                        <button type="button" class="number-control-btn" onclick="decrementQuestions()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 13H5v-2h14v2z"/>
+                            </svg>
+                        </button>
+                        <button type="button" class="number-control-btn" onclick="incrementQuestions()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="difficultyLevel">Difficulty Level:</label>
+                <select id="difficultyLevel" class="form-select">
+                    <option value="beginner">Beginner</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                    <option value="expert">Expert</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="questionType">Question Type:</label>
+                <select id="questionType" class="form-select">
+                    <option value="multiple-choice">Multiple Choice</option>
+                    <option value="free-response">Free Response</option>
+                    <option value="mixed">Mixed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="viewMode">Question Display:</label>
+                <select id="viewMode" class="form-select">
+                    <option value="all">Show All Questions</option>
+                    <option value="single">One Question at a Time</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="timer-toggle">
+                    <label class="switch">
+                        <input type="checkbox" id="timerToggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span>Enable Timer</span>
+                </div>
+                <div id="timerSettings" class="hidden">
+                    <label for="timerMinutes">Time Limit (minutes):</label>
+                    <input type="number" id="timerMinutes" min="1" max="180" value="30">
+                </div>
+            </div>
+
+            <button type="submit" id="generateBtn" class="btn">Generate Quiz</button>
+        </form>
+
+        <!-- Quiz Questions Section -->
+        <section id="quizSection" class="quiz-section hidden">
+            <h2>Quiz Questions</h2>
+            <form id="quizQuestions" class="questions-container">
+                <!-- Questions will be dynamically inserted here -->
+            </form>
+            <button type="button" id="submitQuiz" class="btn">Submit Quiz</button>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section hidden">
+            <div class="results-content">
+                <div class="total-score">
+                    <h2>Quiz Results</h2>
+                    <div class="score-display">
+                        <span class="score-number">0%</span>
+                        <span class="score-details">0 out of 0 correct</span>
+                    </div>
+                </div>
+                <div id="resultsContainer">
+                    <!-- Results will be dynamically inserted here -->
+                </div>
+                <div class="results-buttons">
+                    <button type="button" id="newQuiz" class="btn">Generate New Quiz</button>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div id="aboutModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>About Quiz Forge</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Quiz Forge was created by Shreyas Jambapuram, a high school student passionate about making learning more interactive and efficient.</p>
+                <p>This AI-powered quiz generator helps students and teachers create customized quizzes from any text or PDF document.</p>
+                <div class="creator-info">
+                    <h3>Creator</h3>
+                    <p>Shreyas Jambapuram</p>
+                    <p class="subtitle">High School Student</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="config.js" type="module"></script>
+    <script src="script.js" type="module"></script>
+</body>
+</html> 

@@ -1,0 +1,1684 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border-radius: var(--border-radius);
+}
+
+:root {
+    --primary-color: #4B4EFC;
+    --primary-hover: #3538E8;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --text-color: #1A1A1A;
+    --text-secondary: #6c757d;
+    --background-color: #FFFFFF;
+    --card-background: #FFFFFF;
+    --border-color: #E5E7EB;
+    --border-radius: 12px;
+    --spacing-lg: 2rem;
+    --spacing-md: 1rem;
+    --spacing-sm: 0.5rem;
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+    
+    /* Light theme specific */
+    --input-background: #FFFFFF;
+    --hover-background: #F8F9FF;
+    --success-light: #e8f5e9;
+    --danger-light: #ffebee;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    padding: var(--spacing-lg);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+h1, h2, h3 {
+    color: var(--text-color);
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+
+.quiz-form, .quiz-section, .results-section {
+    background: var(--card-background);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+    position: relative;
+    border-radius: var(--border-radius);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--card-background);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.1);
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.hidden {
+    display: none;
+}
+
+.questions-container {
+    margin-bottom: 1.5rem;
+}
+
+/* Will style quiz questions and results later */
+
+.question {
+    background: var(--card-background);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.question-text {
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+}
+
+.question-number {
+    background: var(--primary-color);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 2px solid #E5E7EB;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Style for selected option */
+.option input[type="radio"]:checked + span {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.option input[type="radio"]:checked {
+    background-color: var(--primary-color);
+}
+
+/* Selected option styling */
+.option.selected,
+.option input[type="radio"]:checked + span + .option {
+    border-color: var(--primary-color);
+    background-color: #F8F9FF;
+}
+
+/* Add a left accent when selected */
+.option::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--primary-color);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.option:hover::before,
+.option input[type="radio"]:checked + span + .option::before {
+    transform: scaleY(1);
+}
+
+/* Custom radio button */
+.option input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #E5E7EB;
+    border-radius: 50%;
+    margin: 0;
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.option input[type="radio"]:checked {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    border-width: 6px;
+}
+
+/* Hover state */
+.option:hover {
+    border-color: var(--primary-color);
+    background-color: #F8F9FF;
+}
+
+/* Selected state with animation */
+.option input[type="radio"]:checked + span + .option {
+    animation: selectPulse 0.3s ease;
+}
+
+@keyframes selectPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.result-item {
+    background: var(--card-background);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+}
+
+.result-item.correct {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.result-item.incorrect {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.score {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-lg);
+    color: var(--primary-color);
+}
+
+.explanation {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: #F3F4F6;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+/* Add these styles for the difficulty selector */
+.form-select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #E5E7EB;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background: var(--card-background);
+    color: var(--text-color);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234B4EFC' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.5em;
+    padding-right: 3rem;
+    transition: all 0.2s ease;
+}
+
+.form-select:hover {
+    border-color: var(--primary-color);
+}
+
+.form-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.1);
+}
+
+/* Style the dropdown options */
+.form-select option {
+    padding: 1rem;
+    background: var(--card-background);
+    color: var(--text-color);
+}
+
+/* Difficulty badges */
+.difficulty-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-right: 0.75rem;
+}
+
+.difficulty-badge.beginner {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.difficulty-badge.easy {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.difficulty-badge.medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.difficulty-badge.hard {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.difficulty-badge.expert {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+/* Question difficulty styling */
+.question.beginner {
+    border-left: 4px solid #e9ecef;
+}
+
+.question.easy {
+    border-left: 4px solid #d4edda;
+}
+
+.question.medium {
+    border-left: 4px solid #fff3cd;
+}
+
+.question.hard {
+    border-left: 4px solid #f8d7da;
+}
+
+.question.expert {
+    border-left: 4px solid #cce5ff;
+}
+
+/* Add to your existing CSS */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: 'Processing...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* Update the loading screen styles */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Add this to show the loading screen when needed */
+.loading-screen:not(.hidden) {
+    display: flex;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--primary-color);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: rotation 1s linear infinite;
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-screen p {
+    color: var(--card-background);
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--card-background);
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--primary-color);
+}
+
+.theme-toggle .moon-icon {
+    display: none;
+}
+
+/* File input styling */
+.file-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.file-input-wrapper input[type="file"] {
+    display: none;
+}
+
+.file-input-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-input-label:hover {
+    background-color: #3538E8;
+}
+
+.file-input-label svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.file-name {
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+/* Dark theme styles */
+[data-theme="dark"] {
+    --text-color: #FFFFFF;
+    --text-secondary: #9CA3AF;
+    --background-color: #1A1A1A;
+    --card-background: #2D2D2D;
+    --border-color: #404040;
+    --input-background: #2d2d2d;
+    --hover-background: #3a3a3a;
+    --success-light: rgba(40, 167, 69, 0.2);
+    --danger-light: rgba(220, 53, 69, 0.2);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3 {
+    color: white;
+}
+
+[data-theme="dark"] .quiz-form,
+[data-theme="dark"] .quiz-section,
+[data-theme="dark"] .results-section {
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .option {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: var(--card-background);
+    border-color: white;
+}
+
+[data-theme="dark"] .theme-toggle svg {
+    fill: white;
+}
+
+[data-theme="dark"] label {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .file-name {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] textarea, 
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] .form-select {
+    background: var(--input-background);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .theme-toggle .sun-icon {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle .moon-icon {
+    display: block;
+}
+
+/* Update the hover state for dark mode */
+[data-theme="dark"] .option:hover {
+    border-color: var(--primary-color);
+    background-color: var(--hover-background);
+}
+
+[data-theme="dark"] .option.selected,
+[data-theme="dark"] .option input[type="radio"]:checked + span + .option {
+    border-color: var(--primary-color);
+    background-color: var(--hover-background);
+}
+
+/* Update the hover background for selected options in dark mode */
+[data-theme="dark"] .option input[type="radio"]:checked + span {
+    color: var(--primary-color);
+}
+
+/* Update the background color for checked state in dark mode */
+[data-theme="dark"] .option input[type="radio"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Add dark mode styles for the review/results screen */
+[data-theme="dark"] .result-item {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .result-item.correct {
+    background-color: var(--success-light);
+    border-color: var(--success-color);
+}
+
+[data-theme="dark"] .result-item.incorrect {
+    background-color: var(--danger-light);
+    border-color: var(--danger-color);
+}
+
+[data-theme="dark"] .explanation {
+    background-color: var(--card-background);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .score {
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .result-item strong {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .result-item p {
+    color: var(--text-color);
+}
+
+/* Update the form select styles for dark mode */
+[data-theme="dark"] .form-select {
+    background-color: var(--input-background);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .form-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* Style the dropdown options in dark mode */
+[data-theme="dark"] .form-select option {
+    background-color: var(--input-background);
+    color: var(--text-color);
+}
+
+/* Update loading screen text color for dark mode */
+[data-theme="dark"] .loading-screen p,
+.loading-screen p {  /* Always keep loading text white since overlay is dark */
+    color: white;
+}
+
+/* Style the loading indicator text for dark mode */
+[data-theme="dark"] .loading::after {
+    color: white;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Add hover effect for the dropdown in dark mode */
+[data-theme="dark"] .form-select:hover {
+    border-color: var(--primary-color);
+}
+
+/* Add styles for free response questions */
+.question-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-right: 0.75rem;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.free-response {
+    margin-top: 1rem;
+}
+
+.response-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #E5E7EB;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.response-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* Dark mode styles for free response */
+[data-theme="dark"] .response-input {
+    background-color: var(--input-background);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .response-input:focus {
+    border-color: var(--primary-color);
+}
+
+/* Add styles for free response results */
+.score-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.feedback {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #F3F4F6;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+[data-theme="dark"] .feedback {
+    background-color: var(--card-background);
+    color: var(--text-color);
+}
+
+/* Add styles for free response grading */
+.sample-answer {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    border-left: 4px solid #28a745;
+}
+
+[data-theme="dark"] .sample-answer {
+    background-color: var(--card-background);
+    color: var(--text-color);
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: var(--primary-color);
+    color: white;
+    margin: 1rem 0;
+}
+
+.feedback, .explanation {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+}
+
+.feedback {
+    background-color: #e9ecef;
+    border-left: 4px solid var(--primary-color);
+}
+
+[data-theme="dark"] .feedback {
+    background-color: var(--card-background);
+}
+
+/* Timer styles */
+.timer-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Switch styling */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Update timer display styles */
+.timer-display {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--card-background);
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    z-index: 1000;
+    border: 2px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.timer-display.warning {
+    color: #ffa500;
+    border-color: #ffa500;
+    animation: pulse 1s infinite;
+}
+
+.timer-display.urgent {
+    color: #dc3545;
+    border-color: #dc3545;
+    animation: pulse 0.5s infinite;
+}
+
+/* Timer alert styles */
+.timer-alert {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius);
+    font-size: 1.5rem;
+    font-weight: 600;
+    z-index: 1001;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.timer-alert.fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: translateX(-50%) scale(1);
+    }
+    50% {
+        transform: translateX(-50%) scale(1.05);
+    }
+    100% {
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+/* Dark mode support */
+[data-theme="dark"] .timer-alert {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--text-color);
+}
+
+/* Tab Navigation Styles */
+.tab-navigation {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    padding: 1rem 2rem;
+    background: var(--card-background);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Essay specific styles */
+.essay-form {
+    background: var(--card-background);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-lg);
+}
+
+.grade-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.feedback-section {
+    margin-top: 2rem;
+}
+
+.feedback-category {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.feedback-category h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+/* Dark mode styles for tabs */
+[data-theme="dark"] .tab-btn {
+    background: var(--card-background);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .tab-btn:hover:not(.active) {
+    background: var(--input-background);
+}
+
+[data-theme="dark"] .feedback-category {
+    background: var(--card-background);
+    color: var(--text-color);
+}
+
+/* Rubric styles */
+.rubric-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#rubricText {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border: 2px solid #E5E7EB;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.rubric-evaluation {
+    background: var(--card-background);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin: 2rem 0;
+    border-left: 4px solid var(--primary-color);
+}
+
+.rubric-list {
+    list-style: none;
+    padding: 0;
+}
+
+.rubric-list li {
+    padding: 1rem;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.rubric-list li:last-child {
+    border-bottom: none;
+}
+
+/* Dark mode styles for rubric */
+[data-theme="dark"] #rubricText {
+    background-color: var(--card-background);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .rubric-evaluation {
+    background-color: var(--card-background);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .rubric-list li {
+    border-color: var(--border-color);
+}
+
+/* Progress container styles */
+.progress-container {
+    margin-bottom: 2rem;
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.progress-text {
+    display: flex;
+    justify-content: center;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.progress-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.progress-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 0.75rem;
+    height: 2px;
+    background-color: var(--border-color);
+    transform: translateY(-50%);
+}
+
+.progress-dot:last-child::after {
+    display: none;
+}
+
+.progress-dot.active {
+    background-color: var(--primary-color);
+    transform: scale(1.2);
+    box-shadow: 0 0 0 2px rgba(75, 78, 252, 0.2);
+}
+
+.progress-dot.completed {
+    background-color: var(--success-color);
+}
+
+.progress-dot.completed::after {
+    background-color: var(--success-color);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .progress-container {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .progress-text {
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .progress-dot {
+    background-color: var(--dark-border);
+}
+
+[data-theme="dark"] .progress-dot::after {
+    background-color: var(--dark-border);
+}
+
+[data-theme="dark"] .progress-dot.active {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(75, 78, 252, 0.3);
+}
+
+[data-theme="dark"] .progress-dot.completed {
+    background-color: var(--success-color);
+}
+
+[data-theme="dark"] .progress-dot.completed::after {
+    background-color: var(--success-color);
+}
+
+/* Question container to support flag button */
+.question-container {
+    position: relative;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+/* Update flag button styles */
+.flag-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.flag-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: all 0.2s ease;
+}
+
+.flag-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
+}
+
+.flag-btn.flagged {
+    color: var(--warning-color);
+}
+
+/* Dark theme support for flag button */
+[data-theme="dark"] .flag-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Update question container to support flag button */
+.question-container {
+    position: relative;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+/* Update progress dots for dark theme */
+[data-theme="dark"] .progress-dot {
+    background-color: var(--border-color);
+}
+
+[data-theme="dark"] .progress-dot.active {
+    background-color: var(--primary-color);
+}
+
+[data-theme="dark"] .progress-dot.completed {
+    background-color: var(--success-color);
+}
+
+/* About button and modal styles */
+.about-link {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.about-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.about-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.about-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.5);
+}
+
+/* Dark mode styles for the about button */
+[data-theme="dark"] .about-btn {
+    background-color: #4B4EFC;
+    color: white;
+}
+
+[data-theme="dark"] .about-btn:hover {
+    background-color: #3538E8;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.8rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 0.5rem;
+}
+
+.modal-body {
+    color: var(--text-color);
+}
+
+.creator-info {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.creator-info h3 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #6B7280;
+    font-size: 0.9rem;
+}
+
+/* Dark mode styles */
+[data-theme="dark"] .modal-content {
+    background: var(--card-background);
+}
+
+[data-theme="dark"] .close-btn {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .creator-info {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .subtitle {
+    color: var(--text-secondary);
+}
+
+/* Update the results display styles */
+.results-content {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.total-score {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.score-display {
+    margin-top: 15px;
+}
+
+.score-number {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--primary-color);
+    display: block;
+}
+
+.score-details {
+    font-size: 18px;
+    color: var(--text-secondary);
+}
+
+.question-result {
+    margin-bottom: 30px;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    background: var(--card-background);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+}
+
+.question-result.correct {
+    border-left: 5px solid var(--success-color);
+}
+
+.question-result.incorrect {
+    border-left: 5px solid var(--danger-color);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.result-indicator {
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+}
+
+.correct .result-indicator {
+    color: var(--success-color);
+    background: var(--success-light);
+}
+
+.incorrect .result-indicator {
+    color: var(--danger-color);
+    background: var(--danger-light);
+}
+
+/* Dark theme styles for results */
+[data-theme="dark"] .total-score {
+    background: var(--card-background);
+}
+
+[data-theme="dark"] .question-result {
+    background: var(--card-background);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .question-header {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .question-content {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .answer-section {
+    background: var(--input-background);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .explanation {
+    background-color: var(--card-background);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .explanation-label {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .score-details {
+    color: var(--text-secondary);
+}
+
+/* Add smooth transitions for theme switching */
+.question-result,
+.total-score,
+.answer-section,
+.explanation {
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: var(--spacing-md);
+    }
+
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.25rem; }
+
+    .score-number {
+        font-size: 2.5rem;
+    }
+
+    .question-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+    }
+}
+
+/* Update results buttons container */
+.results-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.results-buttons .btn {
+    min-width: 200px;
+}
+
+/* Improve text input styling */
+#textInput {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: var(--font-family);
+    resize: vertical;
+    background: var(--card-background);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+#textInput:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.1);
+}
+
+/* Add these styles for the number input */
+input[type="number"] {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background: var(--card-background);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    -moz-appearance: textfield; /* Remove default arrows in Firefox */
+}
+
+/* Remove default arrows/spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Style focus state */
+input[type="number"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.1);
+}
+
+/* Add custom number controls */
+.number-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.number-controls {
+    position: absolute;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.number-control-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.number-control-btn:hover {
+    color: var(--primary-color);
+}
+
+/* Dark mode support */
+[data-theme="dark"] input[type="number"] {
+    background: var(--input-background);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .number-control-btn {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .number-control-btn:hover {
+    color: var(--primary-color);
+}
+
+/* Update flag button styles */
+.flag-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.flag-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: all 0.2s ease;
+}
+
+.flag-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
+}
+
+.flag-btn.flagged {
+    color: var(--warning-color);
+}
+
+/* Dark theme support for flag button */
+[data-theme="dark"] .flag-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Update question container to support flag button */
+.question-container {
+    position: relative;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+/* Update progress dots for dark theme */
+[data-theme="dark"] .progress-dot {
+    background-color: var(--border-color);
+}
+
+[data-theme="dark"] .progress-dot.active {
+    background-color: var(--primary-color);
+}
+
+[data-theme="dark"] .progress-dot.completed {
+    background-color: var(--success-color);
+} 
