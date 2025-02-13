@@ -149,6 +149,7 @@
                 </div>
                 <div class="results-buttons">
                     <button type="button" id="newQuiz" class="btn">Generate New Quiz</button>
+                    <button type="button" id="generateSimilar" class="btn btn-secondary">Generate Similar Quiz</button>
                 </div>
             </div>
         </section>
@@ -167,6 +168,75 @@
                     <p>Shreyas Jambapuram</p>
                     <p class="subtitle">High School Student</p>
                 </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add this modal for similar quiz settings -->
+    <div id="similarQuizModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Similar Quiz Settings</h2>
+                <button class="close-btn" id="closeSimilarQuizModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="similarQuizForm">
+                    <div class="form-group">
+                        <label for="similarDifficulty">Difficulty Level:</label>
+                        <select id="similarDifficulty" class="form-select">
+                            <option value="beginner">Beginner</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="similarQuestionType">Question Type:</label>
+                        <select id="similarQuestionType" class="form-select">
+                            <option value="multiple-choice">Multiple Choice</option>
+                            <option value="free-response">Free Response</option>
+                            <option value="mixed">Mixed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="similarQuestionCount">Number of Questions:</label>
+                        <div class="number-input-wrapper">
+                            <input type="number" 
+                                   id="similarQuestionCount" 
+                                   min="1" 
+                                   max="30" 
+                                   value="5"
+                                   placeholder="Enter number (1-30)">
+                            <div class="number-controls">
+                                <button type="button" class="number-control-btn" onclick="decrementSimilarQuestions()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 13H5v-2h14v2z"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="number-control-btn" onclick="incrementSimilarQuestions()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="similarViewMode">Question Display:</label>
+                        <select id="similarViewMode" class="form-select">
+                            <option value="all">Show All Questions</option>
+                            <option value="single">One Question at a Time</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" class="btn btn-secondary" id="keepCurrentSettings">Keep Current Settings</button>
+                        <button type="submit" class="btn">Generate Quiz</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

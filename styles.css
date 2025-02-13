@@ -3,6 +3,10 @@
     padding: 0;
     box-sizing: border-box;
     border-radius: var(--border-radius);
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
 }
 
 :root {
@@ -24,12 +28,22 @@
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s;
     
     /* Light theme specific */
     --input-background: #FFFFFF;
     --hover-background: #F8F9FF;
     --success-light: #e8f5e9;
     --danger-light: #ffebee;
+    
+    /* Dark theme specific */
+    --dark-background: #1A1A1A;
+    --dark-card: #2D2D2D;
+    --dark-border: #404040;
+    --dark-text: #FFFFFF;
+    --dark-text-secondary: #9CA3AF;
+    --dark-hover: rgba(75, 78, 252, 0.15);
+    --dark-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -80,39 +94,64 @@ h3 { font-size: 1.5rem; }
     color: var(--text-color);
 }
 
-.form-control {
+.form-control,
+.form-select,
+input[type="number"],
+textarea {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius);
     background: var(--card-background);
     color: var(--text-color);
     font-size: 1rem;
-    transition: all 0.2s ease;
+    transition: all var(--transition-speed) ease;
 }
 
-.form-control:focus {
+.form-control:focus,
+.form-select:focus,
+input[type="number"]:focus,
+textarea:focus {
     border-color: var(--primary-color);
     outline: none;
     box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.1);
 }
 
-.btn {
-    display: inline-block;
+.btn, 
+.btn-secondary,
+.about-btn,
+.file-input-label {
     padding: 0.75rem 1.5rem;
-    border: none;
     border-radius: var(--border-radius);
-    background: var(--primary-color);
-    color: white;
     font-weight: 500;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-speed) ease;
+}
+
+.btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
 }
 
 .btn:hover {
-    background: var(--primary-hover);
+    background-color: var(--primary-hover);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: var(--card-background);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .hidden {
@@ -1138,7 +1177,7 @@ input:checked + .slider:before {
 [data-theme="dark"] .progress-container {
     background: var(--dark-card);
     border-color: var(--dark-border);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--dark-shadow);
 }
 
 [data-theme="dark"] .progress-text {
@@ -1147,36 +1186,43 @@ input:checked + .slider:before {
 
 [data-theme="dark"] .progress-dot {
     background-color: var(--dark-border);
+    box-shadow: 0 0 0 2px var(--dark-card);
 }
 
 [data-theme="dark"] .progress-dot::after {
     background-color: var(--dark-border);
+    opacity: 0.5;
 }
 
 [data-theme="dark"] .progress-dot.active {
     background-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(75, 78, 252, 0.3);
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.3);
+    transform: scale(1.2);
 }
 
 [data-theme="dark"] .progress-dot.completed {
     background-color: var(--success-color);
-}
-
-[data-theme="dark"] .progress-dot.completed::after {
-    background-color: var(--success-color);
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
 }
 
 /* Question container to support flag button */
 .question-container {
     position: relative;
-    padding: 1rem;
+    padding: 1.5rem;
     background: var(--card-background);
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-speed) ease;
 }
 
-/* Update flag button styles */
+/* Single question view specific styles */
+[data-view-mode="all"] .question-container {
+    padding-right: 1rem;
+}
+
+/* Flag button styles */
 .flag-btn {
     position: absolute;
     top: 1rem;
@@ -1187,10 +1233,15 @@ input:checked + .slider:before {
     padding: 0.5rem;
     border-radius: 50%;
     transition: all 0.2s ease;
-    display: flex;
+    display: none; /* Hide by default */
     align-items: center;
     justify-content: center;
     color: var(--text-secondary);
+}
+
+/* Show flag button only in single question mode */
+[data-view-mode="single"] .flag-btn {
+    display: flex;
 }
 
 .flag-btn svg {
@@ -1217,11 +1268,13 @@ input:checked + .slider:before {
 /* Update question container to support flag button */
 .question-container {
     position: relative;
-    padding: 1rem;
+    padding: 1.5rem;
     background: var(--card-background);
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-speed) ease;
 }
 
 /* Update progress dots for dark theme */
@@ -1523,6 +1576,7 @@ input:checked + .slider:before {
 .results-buttons {
     display: flex;
     justify-content: center;
+    gap: 1rem;
     margin-top: 2rem;
 }
 
@@ -1663,11 +1717,13 @@ input[type="number"]:focus {
 /* Update question container to support flag button */
 .question-container {
     position: relative;
-    padding: 1rem;
+    padding: 1.5rem;
     background: var(--card-background);
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-speed) ease;
 }
 
 /* Update progress dots for dark theme */
@@ -1681,4 +1737,356 @@ input[type="number"]:focus {
 
 [data-theme="dark"] .progress-dot.completed {
     background-color: var(--success-color);
+}
+
+/* Add styles for the secondary button */
+.btn-secondary {
+    background-color: var(--card-background);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    margin-left: 1rem;
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Update results buttons container */
+.results-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .btn-secondary {
+    background-color: var(--dark-card);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Add these styles for the similar quiz modal */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+#similarQuizForm .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#similarQuizForm .form-select,
+#similarQuizForm input[type="number"] {
+    width: 100%;
+}
+
+/* Dark theme support */
+[data-theme="dark"] #similarQuizForm .form-select,
+[data-theme="dark"] #similarQuizForm input[type="number"] {
+    background: var(--input-background);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+/* Accessibility improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Focus styles */
+:focus-visible {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Add keyboard shortcut hints */
+.shortcut-hint {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Update button styles to show focus state */
+.btn:focus-visible,
+.number-control-btn:focus-visible,
+.flag-btn:focus-visible {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Dark theme support for focus states */
+[data-theme="dark"] :focus-visible {
+    outline-color: var(--primary-color);
+}
+
+/* Update single question view styles for both themes */
+.question-container {
+    position: relative;
+    padding: 1.5rem;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-speed) ease;
+}
+
+/* Progress container improvements */
+.progress-container {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.progress-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Navigation buttons improvements */
+.question-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding: 1rem 0;
+}
+
+.nav-btn {
+    padding: 0.75rem 1.5rem;
+    min-width: 120px;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    background: var(--card-background);
+    color: var(--primary-color);
+    font-weight: 500;
+    transition: all var(--transition-speed) ease;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* Dark theme improvements */
+[data-theme="dark"] .question-container {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: var(--dark-shadow);
+}
+
+[data-theme="dark"] .progress-container {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+    box-shadow: var(--dark-shadow);
+}
+
+[data-theme="dark"] .progress-text {
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .nav-btn {
+    background: var(--dark-card);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: var(--dark-shadow);
+}
+
+[data-theme="dark"] .nav-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: var(--dark-text);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .nav-btn:disabled {
+    border-color: var(--dark-border);
+    color: var(--dark-text-secondary);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+/* Progress dots improvements */
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border-color);
+    transition: all var(--transition-speed) ease;
+    position: relative;
+}
+
+.progress-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 20px;
+    height: 2px;
+    background: var(--border-color);
+    transform: translateY(-50%);
+}
+
+.progress-dot.active {
+    background: var(--primary-color);
+    transform: scale(1.2);
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.2);
+}
+
+.progress-dot.completed {
+    background: var(--success-color);
+}
+
+[data-theme="dark"] .progress-dot {
+    background: var(--dark-border);
+    box-shadow: 0 0 0 2px var(--dark-card);
+}
+
+[data-theme="dark"] .progress-dot::after {
+    background: var(--dark-border);
+    opacity: 0.5;
+}
+
+[data-theme="dark"] .progress-dot.active {
+    background: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(75, 78, 252, 0.3);
+    transform: scale(1.2);
+}
+
+[data-theme="dark"] .progress-dot.completed {
+    background: var(--success-color);
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+}
+
+/* Question content improvements */
+.question-content {
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+[data-theme="dark"] .question-content {
+    color: var(--dark-text);
+}
+
+/* Options styling improvements */
+.options {
+    margin-top: 1.5rem;
+}
+
+.option {
+    background: var(--card-background);
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-speed) ease;
+}
+
+[data-theme="dark"] .option {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .option:hover {
+    border-color: var(--primary-color);
+    background: var(--dark-hover);
+    box-shadow: var(--dark-shadow);
+}
+
+[data-theme="dark"] .option.selected {
+    border-color: var(--primary-color);
+    background: var(--dark-hover);
+    box-shadow: var(--dark-shadow);
+}
+
+[data-theme="dark"] .nav-btn {
+    background: var(--dark-card);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: var(--dark-shadow);
+}
+
+[data-theme="dark"] .nav-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: var(--dark-text);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .nav-btn:disabled {
+    border-color: var(--dark-border);
+    color: var(--dark-text-secondary);
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+/* Add glow effect for active elements in dark mode */
+[data-theme="dark"] .progress-dot.active,
+[data-theme="dark"] .option:hover,
+[data-theme="dark"] .option.selected,
+[data-theme="dark"] .nav-btn:hover:not(:disabled) {
+    box-shadow: 0 0 15px rgba(75, 78, 252, 0.2);
+}
+
+/* Improve question number styling in dark mode */
+[data-theme="dark"] .question-number {
+    background: var(--primary-color);
+    color: var(--dark-text);
+    box-shadow: 0 0 10px rgba(75, 78, 252, 0.3);
+}
+
+/* Add subtle transitions for hover effects */
+.option,
+.nav-btn,
+.progress-dot {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Review section improvements for dark mode */
+[data-theme="dark"] .review-questions {
+    background: var(--dark-card);
+    border-color: var(--dark-border);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--dark-shadow);
+}
+
+[data-theme="dark"] h2 {
+    color: var(--dark-text);
+    border-bottom: 2px solid var(--dark-border);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
 } 

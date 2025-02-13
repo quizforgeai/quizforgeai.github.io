@@ -8,7 +8,8 @@ let currentQuiz = {
     questions: [],
     answers: {}, // Change to object to store answers by question number
     originalText: '', // Store the original text for generating similar quizzes
-    flaggedQuestions: new Set() // Store flagged question numbers
+    flaggedQuestions: new Set(), // Store flagged question numbers
+    settings: {} // Store current quiz settings
 };
 
 // DOM Elements
@@ -95,6 +96,7 @@ async function extractTextFromPDF(file) {
 // Update the form submission handler
 quizForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    storeQuizSettings(); // Store settings when generating initial quiz
     
     const text = textInput.value.trim();
     const numQuestions = parseInt(questionCount.value);
@@ -549,27 +551,33 @@ function saveCurrentAnswer() {
 
 // Add function to display all questions
 function displayAllQuestions() {
+    // Clear flagged questions when switching to all questions view
+    currentQuiz.flaggedQuestions.clear();
+    
     quizQuestions.innerHTML = currentQuiz.questions
         .map((question, index) => generateQuestionHTML(question, index))
         .join('');
 }
 
-// Update the generateQuestionHTML function to include the new flag button
+// Update the generateQuestionHTML function to conditionally show the flag button
 function generateQuestionHTML(question, index) {
     const questionNumber = index + 1;
     const isFlagged = currentQuiz.flaggedQuestions.has(questionNumber);
+    const showFlag = viewMode.value === 'single';
     
     return `
         <div class="question-container">
-            <button class="flag-btn ${isFlagged ? 'flagged' : ''}" 
-                    onclick="toggleFlag(${questionNumber})" 
-                    title="${isFlagged ? 'Unflag Question' : 'Flag Question'}">
-                <svg viewBox="0 0 24 24">
-                    <path d="${isFlagged ? 
-                        'M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z' : 
-                        'M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6h-5.6z'}"/>
-                </svg>
-            </button>
+            ${showFlag ? `
+                <button class="flag-btn ${isFlagged ? 'flagged' : ''}" 
+                        onclick="toggleFlag(${questionNumber})" 
+                        title="${isFlagged ? 'Unflag Question' : 'Flag Question'}">
+                    <svg viewBox="0 0 24 24">
+                        <path d="${isFlagged ? 
+                            'M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z' : 
+                            'M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6h-5.6z'}"/>
+                    </svg>
+                </button>
+            ` : ''}
             <div class="question-content">
                 ${question.type === 'multiple-choice' ? `
                     <div class="question-text">
@@ -608,8 +616,14 @@ function generateQuestionHTML(question, index) {
 }
 
 // Update the generateQuiz function
-async function generateQuiz(text, numQuestions, isVariation = false) {
+async function generateQuiz(text, numQuestions, isVariation = false, settings = null) {
     try {
+        // Use provided settings or current form settings
+        const currentSettings = settings || {
+            difficulty: difficultyLevel.value,
+            questionType: questionType.value
+        };
+
         // Store the original text for generating variations later
         if (!isVariation) {
             currentQuiz.originalText = text;
@@ -623,12 +637,12 @@ async function generateQuiz(text, numQuestions, isVariation = false) {
             body: JSON.stringify({
                 contents: [{
                     parts: [{
-                        text: `As an expert educator, create ${numQuestions} sophisticated ${questionType.value} questions from this text. 
+                        text: `As an expert educator, create ${numQuestions} sophisticated ${currentSettings.questionType} questions from this text. 
                         ${isVariation ? 'Important: Generate completely different questions than before, but on the same topics and concepts.' : ''}
-                        Difficulty level: ${difficultyLevel.value}
+                        Difficulty level: ${currentSettings.difficulty}
 
                         Requirements:
-                        ${questionType.value === 'multiple-choice' ? `
+                        ${currentSettings.questionType === 'multiple-choice' ? `
                         1. Questions should test deep understanding, critical thinking, and application of concepts
                         2. Include analysis, evaluation, and synthesis-level questions (Bloom's higher levels)
                         3. For multiple-choice questions:
@@ -641,74 +655,33 @@ async function generateQuiz(text, numQuestions, isVariation = false) {
                         {
                             "question": "detailed question text",
                             "type": "multiple-choice",
-                            "difficulty": "${difficultyLevel.value}",
+                            "difficulty": "${currentSettings.difficulty}",
                             "options": ["option1", "option2", "option3", "option4"],
                             "correctAnswer": 0,
                             "explanation": "detailed explanation of the answer"
-                        }` : questionType.value === 'free-response' ? `
-                        1. Questions should test deep understanding, critical thinking, and application of concepts
-                        2. Include analysis, evaluation, and synthesis-level questions (Bloom's higher levels)
-                        3. For free-response questions:
-                           - Include scenario-based or case study questions
-                           - Ask for comparisons, analyses, or evaluations
-                           - Require specific examples or evidence from the text
+                        }` : currentSettings.questionType === 'free-response' ? `
+                        1. Questions should require detailed explanations or analysis
+                        2. Include a mix of conceptual and analytical questions
+                        3. Each question should have a sample answer for reference
                         
                         Return a JSON array where each question object has this exact format:
                         {
                             "question": "detailed question text",
                             "type": "free-response",
-                            "difficulty": "${difficultyLevel.value}",
-                            "sampleAnswer": "comprehensive model answer",
-                            "keyPoints": ["key point 1", "key point 2", "key point 3"],
-                            "explanation": "detailed explanation"
+                            "difficulty": "${currentSettings.difficulty}",
+                            "sampleAnswer": "detailed sample answer",
+                            "explanation": "grading criteria and key points to look for"
                         }` : `
-                        1. Questions should test deep understanding, critical thinking, and application of concepts
-                        2. Include analysis, evaluation, and synthesis-level questions (Bloom's higher levels)
-                        3. Create an equal mix of multiple-choice and free-response questions
-                        4. For multiple-choice questions:
-                           - Create plausible distractors that test common misconceptions
-                           - Ensure options are mutually exclusive and similar in length
-                           - Include "all of the above" or "none of the above" sparingly
-                           - Each question MUST have exactly 4 options
-                        5. For free-response questions:
-                           - Include scenario-based or case study questions
-                           - Ask for comparisons, analyses, or evaluations
-                           - Require specific examples or evidence from the text
-
-                        Return a JSON array where each question object has one of these two exact formats:
-                        For multiple-choice questions:
-                        {
-                            "question": "detailed question text",
-                            "type": "multiple-choice",
-                            "difficulty": "${difficultyLevel.value}",
-                            "options": ["option1", "option2", "option3", "option4"],
-                            "correctAnswer": 0,
-                            "explanation": "detailed explanation of the answer"
-                        }
-
-                        For free-response questions:
-                        {
-                            "question": "detailed question text",
-                            "type": "free-response",
-                            "difficulty": "${difficultyLevel.value}",
-                            "sampleAnswer": "comprehensive model answer",
-                            "keyPoints": ["key point 1", "key point 2", "key point 3"],
-                            "explanation": "detailed explanation"
-                        }
-
-                        Important: Return an approximately equal number of multiple-choice and free-response questions.`}
-
+                        1. Mix of multiple-choice and free-response questions
+                        2. Balance between factual recall and critical thinking
+                        3. Include appropriate format for each question type
+                        
+                        Return a JSON array of question objects with appropriate formats as shown above.`}
+                        
                         Text to generate questions from:
-                        ${text}
-
-                        Make questions progressively more challenging. Ensure questions are clear, unambiguous, and test different cognitive levels.
-                        Return only the JSON array with no additional text or formatting.`
+                        ${text}`
                     }]
-                }],
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 2000,
-                }
+                }]
             })
         });
 
@@ -1044,7 +1017,8 @@ newQuizBtn.addEventListener('click', () => {
         questions: [],
         answers: {},
         originalText: '',
-        flaggedQuestions: new Set()
+        flaggedQuestions: new Set(),
+        settings: {}
     };
     quizQuestions.innerHTML = '';
     resultsContainer.innerHTML = '';
@@ -1274,11 +1248,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (essayInput) {
         essayInput.value = '';
     }
+    
+    initializeKeyboardShortcuts();
+    improveAccessibility();
+    initializeModalKeyboardNav();
+    
+    // Add keyboard shortcut hints
+    const shortcuts = {
+        'Previous Question': '←',
+        'Next Question': '→',
+        'Flag Question': 'F',
+        'Submit Quiz': 'Ctrl + S',
+        'Close Modal': 'Esc'
+    };
+    
+    // Add shortcut hints to buttons
+    Object.entries(shortcuts).forEach(([action, key]) => {
+        const hint = document.createElement('span');
+        hint.className = 'shortcut-hint';
+        hint.textContent = key;
+        // Add to relevant buttons based on action
+    });
+
+    // Set initial view mode on load
+    document.documentElement.setAttribute('data-view-mode', viewMode.value);
 });
 
-// Add view mode change handler
+// Update viewMode change handler to set data attribute
 viewMode.addEventListener('change', () => {
+    document.documentElement.setAttribute('data-view-mode', viewMode.value);
     if (currentQuiz.questions.length > 0) {
+        // Clear flagged questions when switching to all questions view
+        if (viewMode.value === 'all') {
+            currentQuiz.flaggedQuestions.clear();
+        }
         displayQuestions(currentQuiz.questions);
     }
 });
@@ -1332,3 +1335,296 @@ document.getElementById('questionCount').addEventListener('input', function(e) {
     if (value > 30) e.target.value = 30;
     if (value < 1) e.target.value = 1;
 });
+
+// Add function to store quiz settings
+function storeQuizSettings() {
+    currentQuiz.settings = {
+        difficulty: document.getElementById('difficultyLevel').value,
+        questionType: document.getElementById('questionType').value,
+        questionCount: document.getElementById('questionCount').value,
+        viewMode: document.getElementById('viewMode').value,
+        timerEnabled: document.getElementById('timerToggle').checked,
+        timerMinutes: document.getElementById('timerMinutes').value
+    };
+}
+
+// Update the similar quiz generation logic
+const similarQuizModal = document.getElementById('similarQuizModal');
+const similarQuizForm = document.getElementById('similarQuizForm');
+const keepCurrentSettingsBtn = document.getElementById('keepCurrentSettings');
+const closeSimilarQuizModalBtn = document.getElementById('closeSimilarQuizModal');
+
+// Update the generate similar quiz button click handler
+document.getElementById('generateSimilar').addEventListener('click', () => {
+    // Populate form with current settings
+    document.getElementById('similarDifficulty').value = currentQuiz.settings.difficulty;
+    document.getElementById('similarQuestionType').value = currentQuiz.settings.questionType;
+    document.getElementById('similarQuestionCount').value = currentQuiz.settings.questionCount;
+    document.getElementById('similarViewMode').value = currentQuiz.settings.viewMode;
+    
+    // Show modal
+    similarQuizModal.classList.remove('hidden');
+    setTimeout(() => similarQuizModal.classList.add('show'), 10);
+});
+
+// Handle keeping current settings
+keepCurrentSettingsBtn.addEventListener('click', async () => {
+    // Show loading screen immediately
+    document.getElementById('loadingScreen').classList.remove('hidden');
+    
+    // Hide modal first
+    similarQuizModal.classList.remove('show');
+    setTimeout(() => similarQuizModal.classList.add('hidden'), 300);
+    
+    try {
+        await generateSimilarQuiz(currentQuiz.settings);
+    } catch (error) {
+        console.error('Error generating similar quiz:', error);
+        alert('Failed to generate similar quiz. Please try again.');
+    } finally {
+        // Hide loading screen
+        document.getElementById('loadingScreen').classList.add('hidden');
+    }
+});
+
+// Handle form submission with new settings
+similarQuizForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Show loading screen immediately
+    document.getElementById('loadingScreen').classList.remove('hidden');
+    
+    // Hide modal first
+    similarQuizModal.classList.remove('show');
+    setTimeout(() => similarQuizModal.classList.add('hidden'), 300);
+    
+    try {
+        const newSettings = {
+            difficulty: document.getElementById('similarDifficulty').value,
+            questionType: document.getElementById('similarQuestionType').value,
+            questionCount: document.getElementById('similarQuestionCount').value,
+            viewMode: document.getElementById('similarViewMode').value,
+            timerEnabled: currentQuiz.settings.timerEnabled,
+            timerMinutes: currentQuiz.settings.timerMinutes
+        };
+
+        // Update quiz state with new settings
+        currentQuiz.settings = newSettings;
+        
+        // Generate new questions
+        const questions = await generateQuiz(
+            currentQuiz.originalText,
+            newSettings.questionCount,
+            true, // isVariation parameter
+            newSettings // Pass the new settings to generateQuiz
+        );
+        
+        // Update quiz state
+        currentQuiz.questions = questions;
+        currentQuiz.answers = {};
+        currentQuiz.flaggedQuestions = new Set();
+        
+        // Hide results and show new quiz
+        document.getElementById('resultsSection').classList.add('hidden');
+        document.getElementById('quizSection').classList.remove('hidden');
+        
+        // Display questions based on view mode
+        if (newSettings.viewMode === 'single') {
+            currentQuestionIndex = 0;
+            displaySingleQuestion();
+        } else {
+            displayAllQuestions();
+        }
+    } catch (error) {
+        console.error('Error generating similar quiz:', error);
+        alert('Failed to generate similar quiz. Please try again.');
+    } finally {
+        // Hide loading screen
+        document.getElementById('loadingScreen').classList.add('hidden');
+    }
+});
+
+// Close modal handler
+closeSimilarQuizModalBtn.addEventListener('click', () => {
+    similarQuizModal.classList.remove('show');
+    setTimeout(() => similarQuizModal.classList.add('hidden'), 300);
+});
+
+// Update the generateSimilarQuiz function to use settings
+async function generateSimilarQuiz(settings) {
+    document.getElementById('loadingScreen').classList.remove('hidden');
+    
+    try {
+        // Use provided settings or current settings
+        const questions = await generateQuiz(
+            currentQuiz.originalText, 
+            settings.questionCount, 
+            true, // isVariation parameter
+            settings // Pass the new settings to generateQuiz
+        );
+        
+        // Update quiz state with new settings
+        currentQuiz.settings = settings;
+        currentQuiz.questions = questions;
+        currentQuiz.answers = {};
+        currentQuiz.flaggedQuestions = new Set();
+        
+        // Hide results and show new quiz
+        document.getElementById('resultsSection').classList.add('hidden');
+        document.getElementById('quizSection').classList.remove('hidden');
+        
+        // Display questions based on view mode
+        if (settings.viewMode === 'single') {
+            currentQuestionIndex = 0;
+            displaySingleQuestion();
+        } else {
+            displayAllQuestions();
+        }
+    } catch (error) {
+        console.error('Error generating similar quiz:', error);
+        alert('Failed to generate similar quiz. Please try again.');
+    } finally {
+        document.getElementById('loadingScreen').classList.add('hidden');
+    }
+}
+
+// Add these functions for similar quiz number input controls
+window.incrementSimilarQuestions = function() {
+    const input = document.getElementById('similarQuestionCount');
+    const currentValue = parseInt(input.value) || 0;
+    if (currentValue < 30) {
+        input.value = currentValue + 1;
+    }
+};
+
+window.decrementSimilarQuestions = function() {
+    const input = document.getElementById('similarQuestionCount');
+    const currentValue = parseInt(input.value) || 0;
+    if (currentValue > 1) {
+        input.value = currentValue - 1;
+    }
+};
+
+// Add input validation for similar quiz number input
+document.getElementById('similarQuestionCount').addEventListener('input', function(e) {
+    let value = parseInt(e.target.value);
+    if (value > 30) e.target.value = 30;
+    if (value < 1) e.target.value = 1;
+});
+
+// Add keyboard shortcuts and accessibility improvements
+function initializeKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // Only handle shortcuts if not typing in an input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+
+        // Shortcuts for single question view
+        if (viewMode.value === 'single' && !quizSection.classList.contains('hidden')) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    // Previous question
+                    if (currentQuestionIndex > 0) {
+                        saveCurrentAnswer();
+                        currentQuestionIndex--;
+                        displaySingleQuestion();
+                    }
+                    break;
+                case 'ArrowRight':
+                    // Next question
+                    if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+                        saveCurrentAnswer();
+                        currentQuestionIndex++;
+                        displaySingleQuestion();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    // Flag/unflag current question
+                    const questionNumber = currentQuestionIndex + 1;
+                    toggleFlag(questionNumber);
+                    break;
+            }
+        }
+
+        // Global shortcuts
+        switch(e.key) {
+            case 'Escape':
+                // Close any open modal
+                const openModals = document.querySelectorAll('.modal:not(.hidden)');
+                openModals.forEach(modal => {
+                    modal.classList.remove('show');
+                    setTimeout(() => modal.classList.add('hidden'), 300);
+                });
+                break;
+            case 's':
+            case 'S':
+                // Submit quiz if visible
+                if (!quizSection.classList.contains('hidden') && e.ctrlKey) {
+                    e.preventDefault();
+                    submitQuizBtn.click();
+                }
+                break;
+        }
+    });
+}
+
+// Add ARIA labels and roles for better accessibility
+function improveAccessibility() {
+    // Add ARIA labels to buttons
+    document.querySelectorAll('button').forEach(button => {
+        if (!button.getAttribute('aria-label')) {
+            button.setAttribute('aria-label', button.textContent.trim());
+        }
+    });
+
+    // Add roles to sections
+    quizSection.setAttribute('role', 'main');
+    resultsSection.setAttribute('role', 'region');
+    resultsSection.setAttribute('aria-label', 'Quiz Results');
+
+    // Add live region for notifications
+    const liveRegion = document.createElement('div');
+    liveRegion.setAttribute('role', 'status');
+    liveRegion.setAttribute('aria-live', 'polite');
+    liveRegion.className = 'sr-only';
+    document.body.appendChild(liveRegion);
+
+    // Update progress announcements for screen readers
+    if (viewMode.value === 'single') {
+        const progressText = document.createElement('div');
+        progressText.className = 'sr-only';
+        progressText.setAttribute('aria-live', 'polite');
+        quizSection.appendChild(progressText);
+    }
+}
+
+// Add keyboard navigation for modal
+function initializeModalKeyboardNav() {
+    const modals = document.querySelectorAll('.modal');
+    
+    modals.forEach(modal => {
+        const focusableElements = modal.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+
+        modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            }
+        });
+    });
+}
